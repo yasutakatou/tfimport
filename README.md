@@ -45,6 +45,41 @@ When you specify a label and target resource, the selection screen does not appe
 
 # config file
 
+The configuration file consists of **tilde(~) spread value**. It consists of a resource name, a refine command, and a search command.<br>
+
+```
+(1) ~ (2) ~ (3)
+```
+
+- (1) AWS Resource Define
+  - This is the name of the definition written in the Terraform document
+- (2) Define a command to list the target resources. The list will be passed to peco.
+- (3) Execute the refinement command based on the output of "(2)"
+
+note) "@@@@" is a special character and "(2)" command string will be replaced.
+  aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(2)".
+
+example)
+
+```
+aws_s3_bucket ~ aws s3 ls | cut -d " " -f 3 ~
+aws_instance ~ aws ec2 describe-instances --output text --query 'Reservations[*].Instances[].{Name: Tags[?Key==`Name`]|[0].Value}' ~ aws ec2 describe-instances --filters "Name=tag:Name,Values=@@@@" | jq -r ".Reservations[].Instances[].InstanceId"
+aws_cloudfront_distribution ~ aws cloudfront list-distributions | jq -r ".DistributionList.Items[]|[.Id,.DomainName]|@csv" ~ echo @@@@ | cut -d , -f 1 | tr -d "\""
+aws_db_instance ~ aws rds describe-db-instances | jq -r ".DBInstances[].DBInstanceIdentifier" ~ 
+aws_dynamodb_table ~ aws dynamodb list-tables | jq -r ".TableNames[]" ~ 
+aws_lambda_function ~ aws lambda list-functions | jq -r ".Functions[].FunctionName" ~ 
+aws_apigatewayv2_api ~ aws apigatewayv2 get-apis | jq -r ".Items[]|[.Name,.ApiId]|@csv" ~ echo @@@@ | cut -d , -f 2 | tr -d "\""
+aws_ecs_cluster ~ aws ecs list-clusters | jq -r ".clusterArns[]" | cut -d / -f 2 ~
+aws_codebuild_project ~ aws codebuild list-projects | jq -r ".projects[]" ~
+aws_codepipeline ~ aws codepipeline list-pipelines | jq -r ".pipelines[]|[.name]|@csv" | tr -d "\"" ~
+aws_codedeploy_app ~ aws deploy list-applications | jq -r ".applications[]" ~
+aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\"" ~
+```
+
+# options
+
+Options should be set as environment variables using "Export" command.
+
 ```
 TFIMPORTPATH
 ```
