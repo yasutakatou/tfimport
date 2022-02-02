@@ -12,6 +12,7 @@ This tool was created with the hope that anyone can import it easily.
 # Feature
 - You can choose which resources to import interactively.
 - Can save configuration information in batches
+- Multiple resources can be imported at once.
 
 # Require
 
@@ -21,8 +22,9 @@ You just need to place the shell script and definition files on a linux server a
 - [AWS CLI](https://aws.amazon.com/jp/cli/)
 - [terraform](https://www.terraform.io/downloads)
 - [peco](https://github.com/peco/peco)
-- jq
+- [jq](https://stedolan.github.io/jq/)
 - standard unix environment
+ - noet) Standard Linux commands like "grep".
 
 note) terraform and peco can be specified without a path.
 
@@ -34,6 +36,8 @@ If you run it without any arguments, you will be in the mode of selecting the re
 ```
 ./tfimport.sh
 ```
+
+note) Select by peco, so you can refine your search with peco.
 
 ## Batch mode
 
@@ -48,13 +52,14 @@ When you specify a label and target resource, the selection screen does not appe
 The configuration file consists of **tilde(~) spread value**. It consists of a resource name, a refine command, and a search command.<br>
 
 ```
-(1) ~ (2) ~ (3)
+(1) ~ (2) ~ (3) ~ (4)
 ```
 
-- (1) AWS Resource Define
+- (1) Define Name
+- (2) AWS Resource Define
   - This is the name of the definition written in the Terraform document
-- (2) Define a command to list the target resources. The list will be passed to peco.
-- (3) Execute the refinement command based on the output of "(2)"
+- (3) Define a command to list the target resources. The list will be passed to peco.
+- (4) Execute the refinement command based on the output of "(2)"
 
 note) "@@@@" is a special character and "(2)" command string will be replaced.
   aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(2)".
