@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -n "${TFIMPORTINI}" ]; then
+  TFIMPORTINI=${TFIMPORTPATH}
+else
+  TFIMPORTINI="./tfimport.ini"
+fi
+
 if [ -n "${TFIMPORTPATH}" ]; then
   PECO="${TFIMPORTPATH}/peco"
   TERRAFORM="${TFIMPORTPATH}/terraform"
@@ -8,67 +14,15 @@ else
   TERRAFORM="./terraform"
 fi
 
-if [ $# == 2 ]; then
-  echo "CLI Mode:"
-  MENU=$1
-
-  if [ -z "${MENU}" ]; then
-    echo "Not select.."
-    exit 1  
-  fi
-
-  AWS=`cat tfimport.ini | grep $1`
-  if [ $? -ne 0 ]; then
-    echo "ini fail..."
-    exit 1
-  fi
-
-	TARGET=$2
+if [ -n "${TFIMPORTSED}" ]; then
+  TFIMPORTSED=${TFIMPORTSED}
 else
-  MENU=`cut -d \~ -f 1 tfimport.ini | tr -d ' ' | tr -d '\t' | ${PECO}`
-
-  if [ -z "${MENU}" ]; then
-    echo "Not select.."
-    exit 1  
-  fi
-
-  AWS=`cat tfimport.ini | grep ${MENU}`
-  if [ $? -ne 0 ]; then
-    echo "ini fail..."
-    exit 1
-  fi
-
-  # echo ${AWS}
-
-  LIST=`echo ${AWS} | cut -d \~ -f 2 | tr -d '\t'`
-  SELECT=`echo ${AWS} | cut -d \~ -f 3 | tr -d '\t'`
-
-  # echo ${LIST}
-  # echo ${SELECT}
-
-  PREEXEC="${LIST} | ${PECO}"
-  EXEC=`eval ${PREEXEC}`
-
-  #echo ${EXEC}
-
-  if [[ "${SELECT}" == *@@@@* ]]; then
-    EXEC=`echo ${SELECT} | sed "s/@@@@/${EXEC}/g"`
-    echo ${EXEC}
-    TARGET=`eval ${EXEC}`
-  else
-    TARGET=$EXEC
-  fi
+  TFIMPORTSED="@@@@"
 fi
 
-if [ -z "${TARGET}" ]; then
-  echo "Not select.."
-  exit 1
+if [ -e "terraform.tfstate" ]; then
+  rm -f terraform.tfstate
 fi
-
-echo "Service: ${MENU}"
-echo "Target: ${TARGET}"
-
-mkdir -p ${TARGET}
 
 cat << EOT > provider.tf
 terraform {
@@ -90,22 +44,121 @@ provider "aws" {
 }
 EOT
 
-cat << EOT > main.tf
-resource "${MENU}" "this" {
-}
-EOT
+MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort | uniq | ${PECO}`
 
-# INIT="${TERRAFORM} init"
-# eval ${INIT}
-
-EXEC="${TERRAFORM} import ${MENU}.this ${TARGET} >/dev/null 2>&1"
-eval ${EXEC}
-if [ $? -ne 0 ]; then
-    echo "Import fail..."
-    exit 1
+if [ -z "${MENU}" ]; then
+  echo "Not select.."
+  exit 1  
 fi
 
-mv terraform.tfstate ${TARGET}/terraform.tfstate_${MENU}_`date +%Y%m%d-%H%M%S`
-echo "Import success!"
+IFS=$'\n'
+AWS=(`grep ${MENU} ${TFIMPORTINI}`)
+#AWS="$(grep ${MENU} ${TFIMPORTINI})"
+#AWS="($(grep ${MENU} ${TFIMPORTINI} | sed "s/$/\n/g"))"
+#AWS="(`grep ${MENU} ${TFIMPORTINI}`)"
+if [ $? -ne 0 ]; then
+  echo "ini fail..."
+  exit 1
+fi
+
+echo "0 ${AWS[0]}"
+echo "1 ${AWS[1]}"
+echo "2 ${AWS[2]}"
+
+i=0
+for AWSLINE in ${AWS[@]}
+do
+  echo "$i => $AWSLINE"
+
+  RESOURCE=`echo ${AWSLINE} | cut -d \~ -f 2 | tr -d '\t' | tr -d ' '`
+  LIST=`echo ${AWSLINE} | cut -d \~ -f 3 | tr -d '\t'`
+  SELECT=`echo ${AWSLINE} | cut -d \~ -f 5 | tr -d '\t'`
+
+  if [ $i -gt 0 ]; then
+    echo " -- loop ${i} --  FIRST ${FIRST} -- "
+    PREEXEC=`echo ${LIST} | sed "s^${TFIMPORTSED}^${FIRST}^g"`
+    echo ${PREEXEC}
+    EXEC=`eval ${PREEXEC}`
+  else
+    echo " -- loop ${i} -- LIST ${LIST} --"
+    PREEXEC="${LIST} | ${PECO}"
+    EXEC=`eval ${PREEXEC}`
+    if [ -z "${EXEC}" ]; then
+      echo "Not select.."
+      exit 1  
+    fi
+  fi
+
+  echo " -- EXEC -- ${EXEC} -- "
+
+  echo " -- SELECT -- ${SELECT} -- "
+
+  if [[ "${SELECT}" == *${TFIMPORTSED}* ]]; then
+    EXEC=`echo ${SELECT} | sed "s^${TFIMPORTSED}^${EXEC}^g"`
+    echo ${EXEC}
+    TARGET=`eval ${EXEC}`
+
+    if [ $i -eq 0 ]; then
+      FIRST=$TARGET
+    fi
+  else
+    TARGET=$EXEC
+
+    if [ $i -eq 0 ]; then
+      FIRST=$TARGET
+    fi
+  fi
+
+  if [ -z "${TARGET}" ]; then
+    echo "Not select.."
+    exit 1
+  fi
+
+  if [ $i -eq 0 ]; then
+    NAME=`echo ${AWSLINE} | cut -d \~ -f 4 | tr -d '\t'`
+    if [[ "${NAME}" == *${TFIMPORTSED}* ]]; then
+      EXEC=`echo ${NAME} | sed "s^${TFIMPORTSED}^${TARGET}^g"`
+      echo ${EXEC}
+      NAME=`eval ${EXEC}`
+      echo "Name: ${NAME}"
+      mkdir -p ${NAME}
+    else
+      NAME=${TARGET}
+			mkdir -p ${NAME}
+    fi
+  fi  
+
+  echo "Service: ${RESOURCE}"
+  echo "Target: ${TARGET}"
+
+cat << EOT > main.tf
+  resource "${RESOURCE}" "this" {
+  }
+EOT
+
+  # INIT="${TERRAFORM} init"
+  # eval ${INIT}
+
+  #exit 0
+
+  DATE=`date +%Y%m%d-%H%M%S`
+  EXEC="${TERRAFORM} import ${RESOURCE}.this ${TARGET} > ${RESOURCE}-${DATE}"
+  eval ${EXEC}
+  if [ $? -ne 0 ]; then
+      echo "Import fail..."
+      echo " - - - - - "
+      cat ${RESOURCE}-${DATE}
+      echo " - - - - - "
+      rm -f ${RESOURCE}-${DATE}
+      exit 1
+  else
+    rm -f ${RESOURCE}-${DATE}
+  fi
+
+  mv terraform.tfstate ${NAME}/terraform.tfstate-${RESOURCE}-${DATE}
+
+  let i++
+done
 rm -f provider.tf main.tf
+echo "Import success!"
 exit 0
