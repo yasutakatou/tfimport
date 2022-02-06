@@ -49,7 +49,7 @@ When you specify a label and target resource, the selection screen does not appe
 ./tfimport.sh (target) (name)
 ```
 
-![2](https://user-images.githubusercontent.com/22161385/152686803-6b03e690-fd99-47a2-99d7-4f2f8f62140a.gif)
+![3](https://user-images.githubusercontent.com/22161385/152705942-447834d6-f43f-48cd-a482-07c5420093d2.gif)
 
 # config file
 
