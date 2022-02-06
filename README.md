@@ -37,15 +37,19 @@ If you run it without any arguments, you will be in the mode of selecting the re
 ./tfimport.sh
 ```
 
+![2](https://user-images.githubusercontent.com/22161385/152686788-26159ede-bd37-48a8-824c-474ecb9b26e7.gif)
+
 note) Select by peco, so you can refine your search with peco.
 
-## Batch mode
+## CLI mode
 
 When you specify a label and target resource, the selection screen does not appear, and it works in batch mode.
 
 ```
 ./tfimport.sh (target) (name)
 ```
+
+![2](https://user-images.githubusercontent.com/22161385/152686803-6b03e690-fd99-47a2-99d7-4f2f8f62140a.gif)
 
 # config file
 
@@ -70,13 +74,13 @@ example)
 
 ```
 S3 ~ aws_s3_bucket ~ aws s3 ls | cut -d " " -f 3 ~ ~ 
-EC2 ~ aws_instance ~ aws ec2 describe-instances --output text --query 'Reservations[*].Instances[].{Name: Tags[?Key==`Name`]|[0].Value}' ~ ~ aws ec2 describe-instances --filters "Name=tag:Name,Values=@@@@" | jq -r ".Reservations[].Instances[].InstanceId"
+EC2 ~ aws_instance ~ aws ec2 describe-instances --output text --query 'Reservations[*].Instances[].{Name: Tags[?Key==`Name`]|[0].Value}' ~ ~ if [[ "@@@@" == *i-* ]];then echo @@@@;else aws ec2 describe-instances --filters "Name=tag:Name,Values=@@@@" | jq -r ".Reservations[].Instances[].InstanceId" ;fi ~
 CloudFront ~ aws_cloudfront_distribution ~ aws cloudfront list-distributions | jq -r ".DistributionList.Items[]|[.Id,.DomainName]|@csv" ~ ~ echo @@@@ | cut -d , -f 1 | tr -d "\""
 RDS ~ aws_db_instance ~ aws rds describe-db-instances | jq -r ".DBInstances[].DBInstanceIdentifier" ~ ~
 DynamoDB ~ aws_dynamodb_table ~ aws dynamodb list-tables | jq -r ".TableNames[]" ~ ~
 Lambda ~ aws_lambda_function ~ aws lambda list-functions | jq -r ".Functions[].FunctionName" ~ ~
-APIGatewayv2 ~ aws_apigatewayv2_api ~ aws apigatewayv2 get-apis | jq -r ".Items[]|[.Name,.ApiId]|@csv" ~ echo @@@@ | cut -d , -f 2 | tr -d "\"" ~ ~
-ECS CLuster ~ aws_ecs_cluster ~ aws ecs list-clusters | jq -r ".clusterArns[]" | cut -d / -f 2 ~ ~
+APIGatewayv2 ~ aws_apigatewayv2_api ~ aws apigatewayv2 get-apis | jq -r ".Items[]|[.Name,.ApiId]|@csv" ~ echo @@@@ | cut -d , -f 1 | tr -d "\"" ~ echo @@@@ | cut -d , -f 2 | tr -d "\"" ~
+ECSCLuster ~ aws_ecs_cluster ~ aws ecs list-clusters | jq -r ".clusterArns[]" | cut -d / -f 2 ~ ~
 CodeBuild ~ aws_codebuild_project ~ aws codebuild list-projects | jq -r ".projects[]" ~ ~
 CodePipeline ~ aws_codepipeline ~ aws codepipeline list-pipelines | jq -r ".pipelines[]|[.name]|@csv" | tr -d "\"" ~ ~
 CodeDeploy ~ aws_codedeploy_app ~ aws deploy list-applications | jq -r ".applications[]" ~ ~
@@ -90,6 +94,8 @@ ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replic
 
 Options should be set as environment variables using "Export" command.
 
+- TFIMPORTPATH
+
 ```
 TFIMPORTPATH
 ```
@@ -97,9 +103,10 @@ TFIMPORTPATH
 With this definition, terraform and peco will be used in the specified path
 export TFIMPORTPATH+/usr/bin
 
-- TFIMPORTPATH
+- TFIMPORTINI
 
-
+- TFIMPORTSED
+- TFIMPORTINIT
 
 # license
 MIT License
