@@ -20,8 +20,16 @@ else
   TFIMPORTSED="@@@@"
 fi
 
-if [ -e "terraform.tfstate" ]; then
-  rm -f terraform.tfstate
+if [ -n "${TFIMPORTINIT}" ]; then
+  INIT="${TERRAFORM} init"
+  eval ${INIT}
+fi
+
+DATE=`date +%Y%m%d-%H%M%S`
+
+if [ -e "./terraform.tfstate" ]; then
+  mv ./terraform.tfstate terraform.tfstate_${DATE}
+  rm -f ./terraform.tfstate
 fi
 
 cat << EOT > provider.tf
@@ -44,65 +52,68 @@ provider "aws" {
 }
 EOT
 
-MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort | uniq | ${PECO}`
+CLI="no"
+if [ $# == 2 ]; then
+  echo "CLI Mode:"
+  CLI="yes"
+	MENU=$1
+else
+  MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort | uniq | ${PECO}`
 
-if [ -z "${MENU}" ]; then
-  echo "Not select.."
-  exit 1  
+  if [ -z "${MENU}" ]; then
+    echo "Not select.."
+    exit 1  
+  fi
 fi
+
+echo "Service: ${MENU}"
 
 IFS=$'\n'
 AWS=(`grep ${MENU} ${TFIMPORTINI}`)
-#AWS="$(grep ${MENU} ${TFIMPORTINI})"
-#AWS="($(grep ${MENU} ${TFIMPORTINI} | sed "s/$/\n/g"))"
-#AWS="(`grep ${MENU} ${TFIMPORTINI}`)"
 if [ $? -ne 0 ]; then
   echo "ini fail..."
   exit 1
 fi
 
-echo "0 ${AWS[0]}"
-echo "1 ${AWS[1]}"
-echo "2 ${AWS[2]}"
-
 i=0
 for AWSLINE in ${AWS[@]}
 do
-  echo "$i => $AWSLINE"
+  # echo "$i => $AWSLINE"
 
   RESOURCE=`echo ${AWSLINE} | cut -d \~ -f 2 | tr -d '\t' | tr -d ' '`
   LIST=`echo ${AWSLINE} | cut -d \~ -f 3 | tr -d '\t'`
   SELECT=`echo ${AWSLINE} | cut -d \~ -f 5 | tr -d '\t'`
 
   if [ $i -gt 0 ]; then
-    echo " -- loop ${i} --  FIRST ${FIRST} -- "
+    # echo " -- ${i} -- FIRST: ${FIRST} -- "
     PREEXEC=`echo ${LIST} | sed "s^${TFIMPORTSED}^${FIRST}^g"`
-    echo ${PREEXEC}
-    EXEC=`eval ${PREEXEC}`
+    SELECTED=`eval ${PREEXEC}`
   else
-    echo " -- loop ${i} -- LIST ${LIST} --"
-    PREEXEC="${LIST} | ${PECO}"
-    EXEC=`eval ${PREEXEC}`
-    if [ -z "${EXEC}" ]; then
-      echo "Not select.."
-      exit 1  
+    # echo " -- ${i} -- LIST: ${LIST} --"
+    if [[ "${CLI}" == *yes* ]]; then
+      SELECTED=$2
+    else
+      PREEXEC="${LIST} | ${PECO}"
+      SELECTED=`eval ${PREEXEC}`
+      if [ -z "${SELECTED}" ]; then
+        echo "Not select.."
+        exit 1  
+      fi
     fi
   fi
 
-  echo " -- EXEC -- ${EXEC} -- "
-
-  echo " -- SELECT -- ${SELECT} -- "
+  # echo " -- SELECTED: ${SELECTED} -- "
+  # echo " -- SELECT: ${SELECT} -- "
 
   if [[ "${SELECT}" == *${TFIMPORTSED}* ]]; then
-    EXEC=`echo ${SELECT} | sed "s^${TFIMPORTSED}^${EXEC}^g"`
-    echo ${EXEC}
+    EXEC=`echo ${SELECT} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
     TARGET=`eval ${EXEC}`
 
     if [ $i -eq 0 ]; then
       FIRST=$TARGET
     fi
   else
-    TARGET=$EXEC
+    TARGET=$SELECTED
 
     if [ $i -eq 0 ]; then
       FIRST=$TARGET
@@ -115,12 +126,13 @@ do
   fi
 
   if [ $i -eq 0 ]; then
+    #echo "AWS Resouce: ${RESOURCE}"
+    echo "Target: ${TARGET}"
     NAME=`echo ${AWSLINE} | cut -d \~ -f 4 | tr -d '\t'`
     if [[ "${NAME}" == *${TFIMPORTSED}* ]]; then
-      EXEC=`echo ${NAME} | sed "s^${TFIMPORTSED}^${TARGET}^g"`
-      echo ${EXEC}
+      EXEC=`echo ${NAME} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
       NAME=`eval ${EXEC}`
-      echo "Name: ${NAME}"
+      # echo "Name: ${NAME}"
       mkdir -p ${NAME}
     else
       NAME=${TARGET}
@@ -128,20 +140,11 @@ do
     fi
   fi  
 
-  echo "Service: ${RESOURCE}"
-  echo "Target: ${TARGET}"
-
 cat << EOT > main.tf
   resource "${RESOURCE}" "this" {
   }
 EOT
 
-  # INIT="${TERRAFORM} init"
-  # eval ${INIT}
-
-  #exit 0
-
-  DATE=`date +%Y%m%d-%H%M%S`
   EXEC="${TERRAFORM} import ${RESOURCE}.this ${TARGET} > ${RESOURCE}-${DATE}"
   eval ${EXEC}
   if [ $? -ne 0 ]; then
