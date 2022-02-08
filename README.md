@@ -46,7 +46,7 @@ note) Select by peco, so you can refine your search with peco.
 When you specify a label and target resource, the selection screen does not appear, and it works in batch mode.
 
 ```
-./tfimport.sh (target) (name)
+./tfimport.sh (Service:) (Target:)
 ```
 
 ![3](https://user-images.githubusercontent.com/22161385/152705942-447834d6-f43f-48cd-a482-07c5420093d2.gif)
@@ -59,16 +59,16 @@ The configuration file consists of **tilde(~) spread value**. It consists of a r
 (1) ~ (2) ~ (3) ~ (4) ~ (5)
 ```
 
-- (1) Define Name
+- (1) Define Service: Name
 - (2) AWS Resource Define
  - This is the name of the definition written in the Terraform document
-- (3) Export Name Define
+- (3) Define a command to list the target resources. The list will be passed to peco.
+- (4) Export Name Define
  - Define the directory name for output (If you define it with A, the file name will be complicated, so specify the definition name
-- (4) Define a command to list the target resources. The list will be passed to peco.
-- (5) Execute the refinement command based on the output of "(2)"
+- (5) Execute the refinement command based on the output of "(3)"
 
-note) "@@@@" is a special character and "(2)" command string will be replaced.
-  aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(2)".
+note) "@@@@" is a special character and "(3)" command string will be replaced.
+  aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(3)".
 
 example)
 
@@ -84,10 +84,18 @@ ECSCLuster ~ aws_ecs_cluster ~ aws ecs list-clusters | jq -r ".clusterArns[]" | 
 CodeBuild ~ aws_codebuild_project ~ aws codebuild list-projects | jq -r ".projects[]" ~ ~
 CodePipeline ~ aws_codepipeline ~ aws codepipeline list-pipelines | jq -r ".pipelines[]|[.name]|@csv" | tr -d "\"" ~ ~
 CodeDeploy ~ aws_codedeploy_app ~ aws deploy list-applications | jq -r ".applications[]" ~ ~
+ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replication-groups | jq -r ".ReplicationGroups[].ReplicationGroupId" ~ ~
+```
+
+## Multiple resources
+
+
+example)
+
+```
 ELB ~ aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\"" ~ echo "@@@@" | cut -d / -f 3 ~  ~
 ELB ~ aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].ListenerArn" | head -1 ~ ~
 ELB ~ aws_lb_target_group ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].DefaultActions[].TargetGroupArn" | head -1 ~ ~
-ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replication-groups | jq -r ".ReplicationGroups[].ReplicationGroupId" ~ ~
 ```
 
 # options
@@ -96,17 +104,44 @@ Options should be set as environment variables using "Export" command.
 
 - TFIMPORTPATH
 
-```
-TFIMPORTPATH
-```
-
 With this definition, terraform and peco will be used in the specified path
-export TFIMPORTPATH+/usr/bin
+
+note) The default is the current directory.
+
+```
+export TFIMPORTPATH=/usr/bin
+```
 
 - TFIMPORTINI
 
+Specifies the location of the definition file.
+
+note) The default is the current directory.
+
+
+```
+export TFIMPORTPATH="~/test/tfimport.ini"
+```
+
 - TFIMPORTSED
+
+Change special characters.
+
+note) The default is "@@@@".
+
+```
+export TFIMPORTSED="####"
+```
+
+Set this if you want to do "terraform init".
+
 - TFIMPORTINIT
+
+note) It is not init by default.
+
+```
+export TFIMPORTINIT="yes"
+```
 
 # license
 MIT License
