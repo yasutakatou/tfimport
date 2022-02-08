@@ -1,13 +1,11 @@
 # tfimport (WIP)
-This is a tool that wraps commands to assist import.
+This is a tool that wraps commands to assist terraform import.
 
 # Solution
 
-Now that DevOps has advanced, is there anything like this?
-I've created the infrastructure, so please "terraform import" it.
-It's a pain in the ass to get used to. Read the documentation from the official site every time.
-This is Toil.
-This tool was created with the hope that anyone can import it easily.
+ Now that DevOps has advanced, is there anything like this?<br>
+I've created the infrastructure, so please "terraform import" it. It's a pain in the ass to get used to. Read the documentation from the official site every time.
+This is Toil. This tool was created with the hope that anyone can import it easily.
 
 # Feature
 - You can choose which resources to import interactively.
@@ -16,7 +14,7 @@ This tool was created with the hope that anyone can import it easily.
 
 # Require
 
-This tool needs to be able to execute the following commands.
+ This tool needs to be able to execute the following commands.<br>
 You just need to place the shell script and definition files on a linux server and it will work.
 
 - [AWS CLI](https://aws.amazon.com/jp/cli/)
@@ -27,6 +25,12 @@ You just need to place the shell script and definition files on a linux server a
  - noet) Standard Linux commands like "grep".
 
 note) terraform and peco can be specified without a path.
+note) Set the credentials in the environment variable as in the setup of AWS CLI.
+
+```
+$ export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
+$ export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 # Usecase
 ## Interactive mode
@@ -89,6 +93,9 @@ ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replic
 
 ## Multiple resources
 
+Resources that have the same target can be imported at once.
+Define the same thing for the service name, and after the second line, write a special definition in "(3)" to replace the selection in the first line.
+With this feature, imports that use the same reference ID can be extracted at once.
 
 example)
 
