@@ -1,11 +1,10 @@
 # tfimport (WIP)
-This is a tool that wraps commands to assist terraform import.
+This is a tool that wraps commands to assist "terraform import".
 
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
-I've created the infrastructure, so please "terraform import" it. It's a pain in the ass to get used to. Read the documentation from the official site every time.
-This is Toil. This tool was created with the hope that anyone can import it easily.
+I've created the infrastructure, so please "terraform import" it. It's a pain in the ass to get used to. Read the documentation from the official site every time.　This is Toil. This tool was created with the hope that anyone can import it easily.
 
 # Feature
 - You can choose which resources to import interactively.
@@ -24,8 +23,8 @@ You just need to place the shell script and definition files on a linux server a
 - standard unix environment
  - noet) Standard Linux commands like "grep".
 
-note) terraform and peco can be specified without a path.
-note) Set the credentials in the environment variable as in the setup of AWS CLI.
+note) terraform and peco can be specified without a path.<br>
+note) Set the credentials in the environment variable as in the setup of AWS CLI.<br>
 
 ```
 $ export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
@@ -71,7 +70,7 @@ The configuration file consists of **tilde(~) spread value**. It consists of a r
  - Define the directory name for output (If you define it with A, the file name will be complicated, so specify the definition name
 - (5) Execute the refinement command based on the output of "(3)"
 
-note) "@@@@" is a special character and "(3)" command string will be replaced.
+note) "@@@@" is a special character and "(3)" command string will be replaced.<br>
   aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(3)".
 
 example)
@@ -93,8 +92,8 @@ ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replic
 
 ## Multiple resources
 
-Resources that have the same target can be imported at once.
-Define the same thing for the service name, and after the second line, write a special definition in "(3)" to replace the selection in the first line.
+Resources that have the same target can be imported at once.<br>
+Define the same thing for the service name, and after the second line, write a special definition in "(3)" to replace the selection in the first line.<br>
 With this feature, imports that use the same reference ID can be extracted at once.
 
 example)
@@ -111,9 +110,9 @@ Options should be set as environment variables using "Export" command.
 
 - TFIMPORTPATH
 
-With this definition, terraform and peco will be used in the specified path
+With this definition, terraform and peco will be used in the specified path<br>
 
-note) The default is the current directory.
+note) The default is the current directory.<br>
 
 ```
 export TFIMPORTPATH=/usr/bin
@@ -121,9 +120,9 @@ export TFIMPORTPATH=/usr/bin
 
 - TFIMPORTINI
 
-Specifies the location of the definition file.
+Specifies the location of the definition file.<br>
 
-note) The default is the current directory.
+note) The default is the current directory.<br>
 
 
 ```
@@ -132,9 +131,9 @@ export TFIMPORTPATH="~/test/tfimport.ini"
 
 - TFIMPORTSED
 
-Change special characters.
+Change special characters.<br>
 
-note) The default is "@@@@".
+note) The default is "@@@@".<br>
 
 ```
 export TFIMPORTSED="####"
