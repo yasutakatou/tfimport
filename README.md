@@ -1,4 +1,4 @@
-# tfimport (WIP)
+# tfimport
 This is a tool that wraps commands to assist **"terraform import"**.
 
 # Solution
@@ -68,7 +68,7 @@ The configuration file consists of **tilde(~) spread value**. It consists of a r
 - (1) Define **Service:** Name
 - (2) AWS Resource Define (This is the name of the definition written in the **Terraform document**)
 - (3) Define a command to list the **target resources**. The list will be **passed to peco**.
-- (4) Export **Name** Define (Define the **directory name for output**.If you define it with @@@@, the file name will be complicated, so specify the definition name)
+- (4) Export **Name** Define (Define the **directory name for output**. If you define it with @@@@, the file name will be complicated, so specify the definition name)
 - (5) Execute the refinement command based on the output of **"(3)"**
 
 note) **"@@@@" is a special character** and **"(3)"** command string will be replaced.<br>
@@ -105,7 +105,9 @@ ELB ~ aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | 
 ELB ~ aws_lb_target_group ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].DefaultActions[].TargetGroupArn" | head -1 ~ ~
 ```
 
-note) ELB ~ aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@**  <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""
+note) A will be **replaced after the second line** as follows.<br>
+aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@** <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""<br>
+aws_lb_target_group ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@** | jq -r ".Listeners[].DefaultActions[].TargetGroupArn" | head -1 <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""<br>
 
 # options
 
