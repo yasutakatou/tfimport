@@ -162,8 +162,8 @@ export TFIMPORTINIT="yes"
 
 Define the **region**.<br>
 
-note) It is **ap-northeast-1** by default.
-note) If you want to **specify a global region such as CloudFront**, you will need to change this.
+note) It is **ap-northeast-1** by default.<br>
+note) If you want to **specify a global region such as CloudFront**, you will need to change this.<br>
 
 ```
 export TFIMPORTREGION="us-east-1"
