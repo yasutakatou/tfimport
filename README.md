@@ -23,7 +23,7 @@ You just need to place the shell script and definition files on a linux server a
 - [terraform](https://www.terraform.io/downloads)
 - [peco](https://github.com/peco/peco)
 - [jq](https://stedolan.github.io/jq/)
-- standard unix environment (Standard Linux commands like "grep".)
+- **Bash** and standard unix environment (Standard Linux commands like "grep".)
 
 and, Set the credentials in the environment variable as in the **setup of AWS CLI**.<br>
 
