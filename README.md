@@ -1,6 +1,10 @@
 # tfimport
 This is a tool that wraps commands to assist **"terraform import"**.
 
+## v1.1
+
+(1) WAFv2 applied to CloudFront (2) Region Environment  support.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
@@ -144,14 +148,25 @@ note) The default is **"@@@@"**.<br>
 export TFIMPORTSED="####"
 ```
 
-Set this if you want to do **"terraform init"**.
-
 - TFIMPORTINIT
 
-note) It is **not init** by default.
+Set this if you want to do **"terraform init"**.<br>
+
+note) It is **not init** by default.<br>
 
 ```
 export TFIMPORTINIT="yes"
+```
+
+- TFIMPORTREGION
+
+Define the **region**.<br>
+
+note) It is **ap-northeast-1** by default.
+note) If you want to **specify a global region such as CloudFront**, you will need to change this.
+
+```
+export TFIMPORTREGION="us-east-1"
 ```
 
 # license
