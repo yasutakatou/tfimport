@@ -1,15 +1,18 @@
 # tfimport (WIP)
-This is a tool that wraps commands to assist "terraform import".
+This is a tool that wraps commands to assist **"terraform import"**.
 
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
-I've created the infrastructure, so please "terraform import" it. It's a pain in the ass to get used to. Read the documentation from the official site every time.　This is Toil. This tool was created with the hope that anyone can import it easily.
+I've created the infrastructure, so please "terraform import" it. It's a pain in the ass to get used to.<br>
+Read the documentation from the official site every time.<br>
+**This is Toil!**<br>
+This tool was created with the hope that anyone can import it easily.
 
 # Feature
-- You can choose which resources to import interactively.
-- Can save configuration information in batches
-- Multiple resources can be imported at once.
+- You can choose which resources to import **interactively**.
+- Can save configuration information in **batches**.
+- **Multiple resources** can be imported at once.
 
 # Require
 
@@ -20,11 +23,9 @@ You just need to place the shell script and definition files on a linux server a
 - [terraform](https://www.terraform.io/downloads)
 - [peco](https://github.com/peco/peco)
 - [jq](https://stedolan.github.io/jq/)
-- standard unix environment
- - noet) Standard Linux commands like "grep".
+- standard unix environment (Standard Linux commands like "grep".)
 
-note) terraform and peco can be specified without a path.<br>
-note) Set the credentials in the environment variable as in the setup of AWS CLI.<br>
+and, Set the credentials in the environment variable as in the **setup of AWS CLI**.<br>
 
 ```
 $ export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
@@ -34,7 +35,7 @@ $ export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 # Usecase
 ## Interactive mode
 
-If you run it without any arguments, you will be in the mode of selecting the resource you want to import from the menu.
+If you run it **without any arguments**, you will be in the mode of selecting the resource you want to import from the menu.
 
 ```
 ./tfimport.sh
@@ -46,13 +47,15 @@ note) Select by peco, so you can refine your search with peco.
 
 ## CLI mode
 
-When you specify a label and target resource, the selection screen does not appear, and it works in batch mode.
+When you specify a **service name and target resource**, the selection screen does not appear, and it works in batch mode.
 
 ```
 ./tfimport.sh (Service:) (Target:)
 ```
 
 ![3](https://user-images.githubusercontent.com/22161385/152705942-447834d6-f43f-48cd-a482-07c5420093d2.gif)
+
+note) You can save infrastructure definitions for batch processing. Definitions can be compared to detect changes.
 
 # config file
 
@@ -62,16 +65,14 @@ The configuration file consists of **tilde(~) spread value**. It consists of a r
 (1) ~ (2) ~ (3) ~ (4) ~ (5)
 ```
 
-- (1) Define Service: Name
-- (2) AWS Resource Define
- - This is the name of the definition written in the Terraform document
-- (3) Define a command to list the target resources. The list will be passed to peco.
-- (4) Export Name Define
- - Define the directory name for output (If you define it with A, the file name will be complicated, so specify the definition name
-- (5) Execute the refinement command based on the output of "(3)"
+- (1) Define **Service:** Name
+- (2) AWS Resource Define (This is the name of the definition written in the **Terraform document**)
+- (3) Define a command to list the **target resources**. The list will be **passed to peco**.
+- (4) Export **Name** Define (Define the **directory name for output**.If you define it with @@@@, the file name will be complicated, so specify the definition name)
+- (5) Execute the refinement command based on the output of **"(3)"**
 
-note) "@@@@" is a special character and "(3)" command string will be replaced.<br>
-  aws s3 ls s3://@@@@/test <- "@@@@" is converted at the output of "(3)".
+note) **"@@@@" is a special character** and **"(3)"** command string will be replaced.<br>
+  aws s3 ls s3://@@@@/test <- "@@@@" is **converted at the output of "(3)"**.
 
 example)
 
@@ -92,9 +93,9 @@ ElastiCahe ~ aws_elasticache_replication_group ~ aws elasticache describe-replic
 
 ## Multiple resources
 
-Resources that have the same target can be imported at once.<br>
-Define the same thing for the service name, and after the second line, write a special definition in "(3)" to replace the selection in the first line.<br>
-With this feature, imports that use the same reference ID can be extracted at once.
+Resources that have the **same target can be imported at once**.<br>
+Define the same thing for the **service name**, and after the second line, write a special definition in **"(3)"** to replace the selection in the first line.<br>
+With this feature, imports that use the **same reference ID can be extracted at once**.
 
 example)
 
@@ -104,15 +105,17 @@ ELB ~ aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | 
 ELB ~ aws_lb_target_group ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].DefaultActions[].TargetGroupArn" | head -1 ~ ~
 ```
 
+note) ELB ~ aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@**  <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""
+
 # options
 
-Options should be set as environment variables using "Export" command.
+Options should be set as environment variables using **"export"** command.<br>
 
 - TFIMPORTPATH
 
-With this definition, terraform and peco will be used in the specified path<br>
+With this definition, terraform and peco will be used in the **specified path**<br>
 
-note) The default is the current directory.<br>
+note) The default is the **current directory**.<br>
 
 ```
 export TFIMPORTPATH=/usr/bin
@@ -120,9 +123,9 @@ export TFIMPORTPATH=/usr/bin
 
 - TFIMPORTINI
 
-Specifies the location of the definition file.<br>
+Specifies the location of the **definition file**.<br>
 
-note) The default is the current directory.<br>
+note) The default is the **current directory**.<br>
 
 
 ```
@@ -131,19 +134,19 @@ export TFIMPORTPATH="~/test/tfimport.ini"
 
 - TFIMPORTSED
 
-Change special characters.<br>
+Change **special characters**.<br>
 
-note) The default is "@@@@".<br>
+note) The default is **"@@@@"**.<br>
 
 ```
 export TFIMPORTSED="####"
 ```
 
-Set this if you want to do "terraform init".
+Set this if you want to do **"terraform init"**.
 
 - TFIMPORTINIT
 
-note) It is not init by default.
+note) It is **not init** by default.
 
 ```
 export TFIMPORTINIT="yes"
