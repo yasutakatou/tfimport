@@ -25,6 +25,12 @@ if [ -n "${TFIMPORTINIT}" ]; then
   eval ${INIT}
 fi
 
+if [ -n "${TFIMPORTREGION}" ]; then
+  TFIMPORTREGION=${TFIMPORTREGION}
+else
+  TFIMPORTREGION="ap-northeast-1"
+fi
+
 DATE=`date +%Y%m%d-%H%M%S`
 
 if [ -e "./terraform.tfstate" ]; then
@@ -48,7 +54,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = "ap-northeast-1"
+  region  = "${TFIMPORTREGION}"
 }
 EOT
 
