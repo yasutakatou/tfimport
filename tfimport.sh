@@ -31,6 +31,12 @@ else
   TFIMPORTREGION="ap-northeast-1"
 fi
 
+if [ -n "${TFIMPORTPROVIDER}" ]; then
+  TFIMPORTPROVIDER=${TFIMPORTPROVIDER}
+else
+  TFIMPORTPROVIDER=">= 3.26.0"
+fi
+
 DATE=`date +%Y%m%d-%H%M%S`
 
 if [ -e "./terraform.tfstate" ]; then
@@ -43,7 +49,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = ">= 3.26.0"
+      version = "${TFIMPORTPROVIDER}"
     }
     template = {
       source = "hashicorp/template"
