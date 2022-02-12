@@ -5,6 +5,10 @@ This is a tool that wraps commands to assist **"terraform import"**.
 
 (1) WAFv2 applied to CloudFront (2) Region Environment  support.
 
+## v1.2
+
+The version of "AWS Provider" can now be fixed.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
@@ -167,6 +171,17 @@ note) If you want to **specify a global region such as CloudFront**, you will ne
 
 ```
 export TFIMPORTREGION="us-east-1"
+```
+
+
+- TFIMPORTPROVIDER
+
+Specify the version of "**AWS Provider**".
+
+note) It is **>= 3.26.0** by default.<br>
+
+```
+export TFIMPORTPROVIDER="~> 3.74.2"
 ```
 
 # license
