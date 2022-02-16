@@ -9,6 +9,10 @@ This is a tool that wraps commands to assist **"terraform import"**.
 
 The version of "AWS Provider" can now be fixed.
 
+## v1.3
+
+support **WAFclassic**.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
