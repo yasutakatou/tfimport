@@ -13,6 +13,10 @@ The version of "AWS Provider" can now be fixed.
 
 support **WAFclassic**.
 
+## v1.4
+
+support **Iam Policy** and **IAM Role**.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
