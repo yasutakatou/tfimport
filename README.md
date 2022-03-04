@@ -17,6 +17,12 @@ support **WAFclassic**.
 
 support **Iam Policy** and **IAM Role**.
 
+## v.15
+
+support **ListenerRule**, and Supports multiple execution of **peco**.<br>
+
+note) "ListenerRule" does not support "CLI Mode".
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
@@ -181,7 +187,6 @@ note) If you want to **specify a global region such as CloudFront**, you will ne
 export TFIMPORTREGION="us-east-1"
 ```
 
-
 - TFIMPORTPROVIDER
 
 Specify the version of "**AWS Provider**".
@@ -190,6 +195,23 @@ note) It is **>= 3.26.0** by default.<br>
 
 ```
 export TFIMPORTPROVIDER="~> 3.74.2"
+```
+
+- TFIMPORTPECOSED
+
+Change **special characters**.<br>
+
+note) The default is **"@@PECO@@"**.<br>
+
+```
+export TFIMPORTPECOSED="##PECO##"
+```
+
+Used to select and narrow down the target resources as follows.
+
+```
+ListenerRule ~ aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\"" ~ echo "@@@@" | cut -d / -f 3 ~  ~
+ListenerRule ~ aws_lb_listener_rule ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].ListenerArn" | head -1 ~ ~ aws elbv2 describe-rules --listener-arn @@@@ | jq -r ".Rules[].RuleArn" | @@PECO@@
 ```
 
 # license
