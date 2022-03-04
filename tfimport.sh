@@ -14,6 +14,12 @@ else
   TERRAFORM="./terraform"
 fi
 
+if [ -n "${TFIMPORTPECOSED}" ]; then
+  TFIMPORTPECOSED=${TFIMPORTPECOSED}
+else
+  TFIMPORTPECOSED="@@PECO@@"
+fi
+
 if [ -n "${TFIMPORTSED}" ]; then
   TFIMPORTSED=${TFIMPORTSED}
 else
@@ -68,20 +74,20 @@ CLI="no"
 if [ $# == 2 ]; then
   echo "CLI Mode:"
   CLI="yes"
-	MENU=$1
+        MENU=$1
 else
   MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort | uniq | ${PECO}`
 
   if [ -z "${MENU}" ]; then
     echo "Not select.."
-    exit 1  
+    exit 1
   fi
 fi
 
 echo "Service: ${MENU}"
 
 IFS=$'\n'
-AWS=(`grep ${MENU} ${TFIMPORTINI}`)
+AWS=(`grep ^${MENU}.*~ ${TFIMPORTINI}`)
 if [ $? -ne 0 ]; then
   echo "ini fail..."
   exit 1
@@ -109,13 +115,17 @@ do
       SELECTED=`eval ${PREEXEC}`
       if [ -z "${SELECTED}" ]; then
         echo "Not select.."
-        exit 1  
+        exit 1
       fi
     fi
   fi
 
   # echo " -- SELECTED: ${SELECTED} -- "
   # echo " -- SELECT: ${SELECT} -- "
+
+  if [[ "${SELECT}" == *${TFIMPORTPECOSED}* ]]; then
+    SELECT=`echo ${SELECT} | sed "s^${TFIMPORTPECOSED}^${PECO}^g"`
+  fi
 
   if [[ "${SELECT}" == *${TFIMPORTSED}* ]]; then
     EXEC=`echo ${SELECT} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
@@ -141,6 +151,10 @@ do
     #echo "AWS Resouce: ${RESOURCE}"
     echo "Target: ${TARGET}"
     NAME=`echo ${AWSLINE} | cut -d \~ -f 4 | tr -d '\t'`
+    if [[ "${NAME}" == *${TFIMPORTPECOSED}* ]]; then
+      NAME=`echo ${NAME} | sed "s^${TFIMPORTPECOSED}^${PECO}^g"`
+    fi
+
     if [[ "${NAME}" == *${TFIMPORTSED}* ]]; then
       EXEC=`echo ${NAME} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
       NAME=`eval ${EXEC}`
@@ -148,9 +162,9 @@ do
       mkdir -p ${NAME}
     else
       NAME=${TARGET}
-			mkdir -p ${NAME}
+      mkdir -p ${NAME}
     fi
-  fi  
+  fi
 
 cat << EOT > main.tf
   resource "${RESOURCE}" "this" {
