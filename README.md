@@ -17,7 +17,7 @@ support **WAFclassic**.
 
 support **Iam Policy** and **IAM Role**.
 
-## v.15
+## v1.5
 
 support **ListenerRule**, and Supports multiple execution of **peco**.<br>
 
