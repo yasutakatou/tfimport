@@ -23,6 +23,10 @@ support **ListenerRule**, and Supports multiple execution of **peco**.<br>
 
 note) "ListenerRule" does not support "CLI Mode".
 
+## v1.6
+
+support **secretsmanager**.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
