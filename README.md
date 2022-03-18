@@ -27,6 +27,10 @@ note) "ListenerRule" does not support "CLI Mode".
 
 support **secretsmanager**.
 
+## v1.7
+
+support **ECS Autoscale**.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
