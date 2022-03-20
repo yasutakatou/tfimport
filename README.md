@@ -20,7 +20,7 @@ support **Iam Policy** and **IAM Role**.
 ## v1.5
 
 support **ListenerRule**, and Supports multiple execution of **peco**.<br>
-
+<br>
 note) "ListenerRule" does not support "CLI Mode".
 
 ## v1.6
@@ -30,6 +30,12 @@ support **secretsmanager**.
 ## v1.7
 
 support **ECS Autoscale**.
+
+## v2.0
+
+Added the ability to import **multiple resources at once**.<br>
+<br>
+note) Implemented with the added definition of **MultiListenerRule**.
 
 # Solution
 
@@ -139,6 +145,18 @@ note) A will be **replaced after the second line** as follows.<br>
 aws_lb_listener ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@** <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""<br>
 aws_lb_target_group ~ aws elbv2 describe-listeners --load-balancer-arn **@@@@** | jq -r ".Listeners[].DefaultActions[].TargetGroupArn" | head -1 <- **"@@@@"** is aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\""<br>
 
+## Multiple import
+
+Import multiple resources **at once**. "ALB Listener" rules that had to be imported one at a time, such as A rules, can now be imported at once.
+
+example) 
+
+```
+MultiListenerRule ~ aws_lb_listener_rule ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].ListenerArn" | head -1 ~ ~ @@MULTI@@ aws elbv2 describe-rules --listener-arn @@@@ | jq -r ".Rules[].RuleArn"
+```
+
+note) Definitions that contain the special character A will have their output **imported line by line, one at a time**.
+
 # options
 
 Options should be set as environment variables using **"export"** command.<br>
@@ -221,6 +239,24 @@ Used to select and narrow down the target resources as follows.
 ListenerRule ~ aws_lb ~ aws elbv2 describe-load-balancers | jq -r ".LoadBalancers[].LoadBalancerArn" | tr -d "\"" ~ echo "@@@@" | cut -d / -f 3 ~  ~
 ListenerRule ~ aws_lb_listener_rule ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].ListenerArn" | head -1 ~ ~ aws elbv2 describe-rules --listener-arn @@@@ | jq -r ".Rules[].RuleArn" | @@PECO@@
 ```
+
+- TFIMPORTMULTIEXPORT
+
+Change **special characters**.<br>
+
+note) The default is **"@@MULTI@@"**.<br>
+
+```
+export TFIMPORTMULTIEXPORT="##MULTI##"
+```
+
+import multiple resources if they contain strings defined as follows.
+
+```
+LMultiListenerRule ~ aws_lb_listener_rule ~ aws elbv2 describe-listeners --load-balancer-arn @@@@ | jq -r ".Listeners[].ListenerArn" | head -1 ~ ~ @@MULTI@@ aws elbv2 describe-rules --listener-arn @@@@ | jq -r ".Rules[].RuleArn"
+```
+
+note) It works if it is defined at the beginning or at the end.
 
 # license
 MIT License
