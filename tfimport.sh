@@ -1,5 +1,29 @@
 #!/bin/bash
 
+function terraformimport () {
+cat << EOT > main.tf
+  resource "$1" "$5$6" {
+  }
+EOT
+
+  EXEC="$2 import $1.$5$6 $3 > $1-$4"
+  eval ${EXEC}
+  if [ $? -ne 0 ]; then
+      echo "Import fail..."
+      echo " - - - - - "
+      cat $1-$4
+      echo " - - - - - "
+      rm -f $1-$4
+      exit 1
+  else
+    rm -f $1-$4
+  fi
+
+  mv terraform.tfstate $5/terraform.tfstate-$1-$6_$4
+  echo "Import success!: $1-$6"
+  rm -f provider.tf main.tf
+}
+
 if [ -n "${TFIMPORTINI}" ]; then
   TFIMPORTINI=${TFIMPORTPATH}
 else
@@ -18,6 +42,12 @@ if [ -n "${TFIMPORTPECOSED}" ]; then
   TFIMPORTPECOSED=${TFIMPORTPECOSED}
 else
   TFIMPORTPECOSED="@@PECO@@"
+fi
+
+if [ -n "${TFIMPORTMULTIEXPORT}" ]; then
+  TFIMPORTMULTIEXPORT=${TFIMPORTMULTIEXPORT}
+else
+  TFIMPORTMULTIEXPORT="@@MULTI@@"
 fi
 
 if [ -n "${TFIMPORTSED}" ]; then
@@ -74,9 +104,10 @@ CLI="no"
 if [ $# == 2 ]; then
   echo "CLI Mode:"
   CLI="yes"
-        MENU=$1
+MENU=$1
 else
-  MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort | uniq | ${PECO}`
+  MENU=`cut -d \~ -f 1 ${TFIMPORTINI} | tr -d ' ' | tr -d '\t' | sort |
+uniq | ${PECO}`
 
   if [ -z "${MENU}" ]; then
     echo "Not select.."
@@ -93,7 +124,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-i=0
+i=1
 for AWSLINE in ${AWS[@]}
 do
   # echo "$i => $AWSLINE"
@@ -102,7 +133,7 @@ do
   LIST=`echo ${AWSLINE} | cut -d \~ -f 3 | tr -d '\t'`
   SELECT=`echo ${AWSLINE} | cut -d \~ -f 5 | tr -d '\t'`
 
-  if [ $i -gt 0 ]; then
+  if [ $i -gt 1 ]; then
     # echo " -- ${i} -- FIRST: ${FIRST} -- "
     PREEXEC=`echo ${LIST} | sed "s^${TFIMPORTSED}^${FIRST}^g"`
     SELECTED=`eval ${PREEXEC}`
@@ -129,15 +160,42 @@ do
 
   if [[ "${SELECT}" == *${TFIMPORTSED}* ]]; then
     EXEC=`echo ${SELECT} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
-    TARGET=`eval ${EXEC}`
 
-    if [ $i -eq 0 ]; then
+    if [[ "${SELECT}" == *${TFIMPORTMULTIEXPORT}* ]]; then
+      MULTI=`echo ${EXEC} | sed "s^${TFIMPORTMULTIEXPORT}^^g"`
+      TARGET=`eval ${MULTI}`
+      r=1
+      for MULTILINE in ${TARGET[@]}
+      do
+        terraformimport ${RESOURCE} ${TERRAFORM} ${MULTILINE} ${DATE}
+${NAME} $r
+        let r++
+      done
+      exit 0
+    else
+      TARGET=`eval ${EXEC}`
+    fi
+
+    if [ $i -eq 1 ]; then
       FIRST=$TARGET
     fi
   else
     TARGET=$SELECTED
 
-    if [ $i -eq 0 ]; then
+    if [[ "${SELECT}" == *${TFIMPORTMULTIEXPORT}* ]]; then
+      MULTI=`echo ${EXEC} | sed "s^${TFIMPORTMULTIEXPORT}^^g"`
+      TARGET=`eval ${MULTI}`
+      r=1
+      for MULTILINE in ${TARGET[@]}
+      do
+        terraformimport ${RESOURCE} ${TERRAFORM} ${MULTILINE} ${DATE}
+${NAME} $r
+        let r++
+      done
+      exit 0
+    fi
+
+    if [ $i -eq 1 ]; then
       FIRST=$TARGET
     fi
   fi
@@ -147,7 +205,7 @@ do
     exit 1
   fi
 
-  if [ $i -eq 0 ]; then
+  if [ $i -eq 1 ]; then
     #echo "AWS Resouce: ${RESOURCE}"
     echo "Target: ${TARGET}"
     NAME=`echo ${AWSLINE} | cut -d \~ -f 4 | tr -d '\t'`
@@ -166,28 +224,8 @@ do
     fi
   fi
 
-cat << EOT > main.tf
-  resource "${RESOURCE}" "this" {
-  }
-EOT
-
-  EXEC="${TERRAFORM} import ${RESOURCE}.this ${TARGET} > ${RESOURCE}-${DATE}"
-  eval ${EXEC}
-  if [ $? -ne 0 ]; then
-      echo "Import fail..."
-      echo " - - - - - "
-      cat ${RESOURCE}-${DATE}
-      echo " - - - - - "
-      rm -f ${RESOURCE}-${DATE}
-      exit 1
-  else
-    rm -f ${RESOURCE}-${DATE}
-  fi
-
-  mv terraform.tfstate ${NAME}/terraform.tfstate-${RESOURCE}-${DATE}
+  terraformimport ${RESOURCE} ${TERRAFORM} ${TARGET} ${DATE} ${NAME} $i
 
   let i++
 done
-rm -f provider.tf main.tf
-echo "Import success!"
 exit 0
