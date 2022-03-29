@@ -19,16 +19,18 @@ EOT
     rm -f $1-$4
   fi
 
-  mv terraform.tfstate $5/terraform.tfstate-$1-$6_$4
+  mv -f ./terraform.tfstate $5/terraform.tfstate-$6_$4
   echo "Import success!: $1-$6"
   rm -f provider.tf main.tf
 }
 
-if [ -n "${TFIMPORTINI}" ]; then
-  TFIMPORTINI=${TFIMPORTPATH}
+if [ -n "${TFIMPORTENV}" ]; then
+  TFIMPORTENV=${TFIMPORTENV}
 else
-  TFIMPORTINI="./tfimport.ini"
+  TFIMPORTENV="aws"
 fi
+
+TFIMPORTINI="${TFIMPORTENV}.ini"
 
 if [ -n "${TFIMPORTPATH}" ]; then
   PECO="${TFIMPORTPATH}/peco"
@@ -70,7 +72,7 @@ fi
 if [ -n "${TFIMPORTPROVIDER}" ]; then
   TFIMPORTPROVIDER=${TFIMPORTPROVIDER}
 else
-  TFIMPORTPROVIDER=">= 3.26.0"
+  TFIMPORTPROVIDER="~> 3.74.2"
 fi
 
 DATE=`date +%Y%m%d-%H%M%S`
@@ -80,25 +82,9 @@ if [ -e "./terraform.tfstate" ]; then
   rm -f ./terraform.tfstate
 fi
 
-cat << EOT > provider.tf
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "${TFIMPORTPROVIDER}"
-    }
-    template = {
-      source = "hashicorp/template"
-      version = ">= 2.2.0"
-    }
-  }
-  required_version = ">= 1.0"
-}
-
-provider "aws" {
-  region  = "${TFIMPORTREGION}"
-}
-EOT
+cp -f ${TFIMPORTENV}.provider provider.tf
+sed -i ".bak" "s/TFIMPORTPROVIDER/${TFIMPORTPROVIDER}/g" provider.tf
+sed -i ".bak" "s/TFIMPORTREGION/${TFIMPORTREGION}/g" provider.tf
 
 CLI="no"
 if [ $# == 2 ]; then
@@ -167,7 +153,7 @@ do
       r=1
       for MULTILINE in ${TARGET[@]}
       do
-        terraformimport ${RESOURCE} ${TERRAFORM} ${MULTILINE} ${DATE}
+        terraformimport ${RESOURCE} ${TERRAFORM} ${TFIMPORTENV}-${MULTILINE} ${DATE}
 ${NAME} $r
         let r++
       done
@@ -188,8 +174,7 @@ ${NAME} $r
       r=1
       for MULTILINE in ${TARGET[@]}
       do
-        terraformimport ${RESOURCE} ${TERRAFORM} ${MULTILINE} ${DATE}
-${NAME} $r
+        terraformimport ${RESOURCE} ${TERRAFORM} ${MULTILINE} ${DATE} ${TFIMPORTENV}-${NAME} $r
         let r++
       done
       exit 0
@@ -217,14 +202,14 @@ ${NAME} $r
       EXEC=`echo ${NAME} | sed "s^${TFIMPORTSED}^${SELECTED}^g"`
       NAME=`eval ${EXEC}`
       # echo "Name: ${NAME}"
-      mkdir -p ${NAME}
+      mkdir -p ${TFIMPORTENV}-${NAME}
     else
       NAME=${TARGET}
-      mkdir -p ${NAME}
+      mkdir -p ${TFIMPORTENV}-${NAME}
     fi
   fi
 
-  terraformimport ${RESOURCE} ${TERRAFORM} ${TARGET} ${DATE} ${NAME} $i
+  terraformimport ${RESOURCE} ${TERRAFORM} ${TARGET} ${DATE} ${TFIMPORTENV}-${NAME} $i
 
   let i++
 done

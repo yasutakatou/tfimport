@@ -1,0 +1,21 @@
+provider "datadog" {
+  api_key = "【DD-API-KEY】"
+  app_key = "【DD-APPLICATION-KEY】"
+}
+
+provider "aws" {
+  region  = "TFIMPORTREGION"
+}
+
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "TFIMPORTPROVIDER"
+    }
+    datadog = {
+      source = "DataDog/datadog"
+    }
+  }
+}
