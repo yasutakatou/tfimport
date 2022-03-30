@@ -37,6 +37,13 @@ Added the ability to import **multiple resources at once**.<br>
 <br>
 note) Implemented with the added definition of **MultiListenerRule**.
 
+## v3.0
+
+Support Mac OS
+Support S3 Lifecycle and Versioning
+Support datadog monitor
+Switching import resources
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
@@ -169,6 +176,14 @@ note) The default is the **current directory**.<br>
 
 ```
 export TFIMPORTPATH=/usr/bin
+```
+
+- TFIMPORTSEDOPTION
+
+Avoid failures due to differences in option specifications on the Mac by specifying options in advance.<br>
+
+```
+export TFIMPORTSEDOPTION=".bak"
 ```
 
 - TFIMPORTINI
