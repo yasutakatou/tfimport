@@ -39,10 +39,10 @@ note) Implemented with the added definition of **MultiListenerRule**.
 
 ## v3.0
 
-Support Mac OS
-Support S3 Lifecycle and Versioning
-Support datadog monitor
-Switching import resources
+Support Mac OS<br>
+Support S3 Lifecycle and Versioning<br>
+Support datadog monitor<br>
+Switching import resources<br>
 
 # Solution
 
