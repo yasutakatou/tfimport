@@ -32,6 +32,12 @@ fi
 
 TFIMPORTINI="${TFIMPORTENV}.ini"
 
+if [ -n "${TFIMPORTSEDOPTION}" ]; then
+  TFIMPORTSEDOPTION=${TFIMPORTSEDOPTION}
+else
+  TFIMPORTSEDOPTION=""
+fi
+
 if [ -n "${TFIMPORTPATH}" ]; then
   PECO="${TFIMPORTPATH}/peco"
   TERRAFORM="${TFIMPORTPATH}/terraform"
@@ -83,8 +89,8 @@ if [ -e "./terraform.tfstate" ]; then
 fi
 
 cp -f ${TFIMPORTENV}.provider provider.tf
-sed -i ".bak" "s/TFIMPORTPROVIDER/${TFIMPORTPROVIDER}/g" provider.tf
-sed -i ".bak" "s/TFIMPORTREGION/${TFIMPORTREGION}/g" provider.tf
+sed -i ${TFIMPORTSEDOPTION} "s/TFIMPORTPROVIDER/${TFIMPORTPROVIDER}/g" provider.tf
+sed -i ${TFIMPORTSEDOPTION} "s/TFIMPORTREGION/${TFIMPORTREGION}/g" provider.tf
 
 CLI="no"
 if [ $# == 2 ]; then
