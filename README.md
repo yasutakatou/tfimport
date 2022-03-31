@@ -55,6 +55,7 @@ This tool was created with the hope that anyone can import it easily.
 - You can choose which resources to import **interactively**.
 - Can save configuration information in **batches**.
 - **Multiple resources** can be imported at once.
+- It runs in the Bash ecosystem, so it is **OS-independent**.
 
 # Require
 
@@ -65,6 +66,7 @@ You just need to place the shell script and definition files on a linux server a
 - [terraform](https://www.terraform.io/downloads)
 - [peco](https://github.com/peco/peco)
 - [jq](https://stedolan.github.io/jq/)
+- [cURL](https://curl.se/)
 - **Bash** and standard unix environment (Standard Linux commands like "grep".)
 
 and, Set the credentials in the environment variable as in the **setup of AWS CLI**.<br>
