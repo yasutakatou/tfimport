@@ -39,10 +39,9 @@ note) Implemented with the added definition of **MultiListenerRule**.
 
 ## v3.0
 
-Support Mac OS<br>
-Support S3 Lifecycle and Versioning<br>
-Support datadog monitor<br>
-Switching import resources<br>
+Support **Mac OS**<br>
+Support **S3 Lifecycle and Versioning**<br>
+Support **datadog monitor** , and Switching import resources<br>
 
 # Solution
 
@@ -167,6 +166,20 @@ note) Definitions that contain the special character A will have their output **
 # options
 
 Options should be set as environment variables using **"export"** command.<br>
+Here is an example of switching to **datadog**.<br>
+
+```
+export TFIMPORTENV=datadog
+```
+
+- TFIMPORTENV
+
+Switches the resource to be **imported**.<br>
+note) **.ini file** and **provider.tf** are set to the names specified. Default is **aws**.<br>
+
+```
+export TFIMPORTENV=datadog
+```
 
 - TFIMPORTPATH
 
@@ -180,7 +193,7 @@ export TFIMPORTPATH=/usr/bin
 
 - TFIMPORTSEDOPTION
 
-Avoid failures due to differences in option specifications on the Mac by specifying options in advance.<br>
+Avoid failures due to differences in option specifications on **Mac OS** by specifying options in advance.<br>
 
 ```
 export TFIMPORTSEDOPTION=".bak"
