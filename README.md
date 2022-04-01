@@ -43,6 +43,10 @@ Support **Mac OS**<br>
 Support **S3 Lifecycle and Versioning**<br>
 Support **datadog monitor** , and Switching import resources<br>
 
+## v3.1
+
+support **Bucket ACL**, and **multiple S3 Resources**.
+
 # Solution
 
  Now that DevOps has advanced, is there anything like this?<br>
