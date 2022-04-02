@@ -43,6 +43,12 @@ Support **Mac OS**<br>
 Support **S3 Lifecycle and Versioning**<br>
 Support **datadog monitor** , and Switching import resources<br>
 
+At any rate, if you specify this, it will work on **Mac OS**.<br>
+
+```
+export TFIMPORTSEDOPTION=".bak"
+```
+
 ## v3.1
 
 support **Bucket ACL**, and **multiple S3 Resources**.
@@ -168,6 +174,27 @@ MultiListenerRule ~ aws_lb_listener_rule ~ aws elbv2 describe-listeners --load-b
 ```
 
 note) Definitions that contain the special character A will have their output **imported line by line, one at a time**.
+
+## datadog monitor
+
+**datadog monitor** can import. To do so, get **datadog API Key** and **datadog APPLICATION Key** from the **control panel of datadog** and **rewrite the config**.
+
+- DD-API-KEY : datadog API Key
+- DD-APPLICATION-KEY : datadog APPLICATION Key
+
+```
+・datadog.ini
+　-H "DD-API-KEY: 【DD-API-KEY】" -H "DD-APPLICATION-KEY: 【DD-APPLICATION-KEY】" 
+・datadog.provider
+  api_key = "【DD-API-KEY】"
+  app_key = "【DD-APPLICATION-KEY】"
+```
+
+and, set TFIMPORTENV.
+
+```
+export TFIMPORTENV=datadog
+```
 
 # options
 
